@@ -10,9 +10,11 @@ import SwiftUI
 struct ButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
-
+            .background(Color.white)
             .overlay(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25))
                                     .stroke(Color.black, lineWidth: 2.5))
+            .clipShape(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25)))
+        
     }
 }
 
@@ -115,12 +117,14 @@ struct ContentView: View {
             }
 
         }
-        .alert(scoreTitle, isPresented: $showingScore) {
-            Button("Continue", action: next)
-        } message:  {
-            Text("Your score is \(score)")
+        .alert(isPresented: $showingScore) {
+            Alert(
+                title: Text("\(scoreTitle)"),
+                message: Text("You have \(score) points in total"),
+                dismissButton: .default(Text("Continue")) {
+                    next()
+                })
         }
-
 
     }
 
