@@ -7,27 +7,26 @@
 
 import SwiftUI
 
-//
-//struct ButtonStyle: ViewModifier {
-//    func body(content: Content) -> some View {
-//        content
-//
-//            .overlay(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25))
-//                                    .stroke(Color.black, lineWidth: 2.5))
-//    }
-//}
+struct ButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+
+            .overlay(RoundedRectangle(cornerSize: CGSize(width: 25, height: 25))
+                                    .stroke(Color.black, lineWidth: 2.5))
+    }
+}
+
+extension View {
+    func buttonStyle() ->  some View {
+        modifier(ButtonStyle())
+    }
+}
 struct ContentView: View {
-
-    let movesDict = [
-        "Rock": "🪨",
-        "Scissors": "✂️",
-        "Paper": "📄"
-    ]
-
+    
     let moves = [
         "🪨",
+        "📄",
         "✂️",
-        "📄"
     ]
 
     @State private var appChoice = Int.random(in: 0...2)
@@ -39,6 +38,23 @@ struct ContentView: View {
 
     @State private var gameEnded = false
 
+    var correctChoice: Int {
+            if shouldWin {
+                switch appChoice {
+                case 0: return 1
+                case 1: return 2
+                case 2: return 0
+                default: return 0
+                }
+            } else {
+                switch appChoice {
+                case 0: return 2
+                case 1: return 0
+                case 2: return 1
+                default: return 0
+                }
+            }
+        }
     var body: some View {
 
         ZStack {
@@ -72,29 +88,18 @@ struct ContentView: View {
 
                 VStack(spacing: 15) {
 
-                    // Dictionary way, cannot index by number
-    //                ForEach(moves.sorted(by: >), id: \.key) {key, value in
-    //                    Button {
-    //                        print("tapped button")
-    //                    } label : {
-    //                        Text("\(key) \(value) ")
-    //                            .font(.largeTitle)
-    //                    }
-    //
-    //                }
-
                     ForEach(0..<moves.count, id: \.self) { number in
-
                         Button {
-                            calculateWinOrLose(for: number, toWin: shouldWin)
+                            calculateWinOrLose(number)
                            } label : {
                                Text(moves[number])
                                .font(.system(size: 100))
                            }
                         
-                        }
                     }
-
+                    .buttonStyle()
+                }
+            
                 Spacer()
 
                 Text("Score is \(score)")
@@ -119,121 +124,26 @@ struct ContentView: View {
 
     }
 
-    func calculateWinOrLose(for number: Int, toWin playerToWin: Bool) {
-        print("Player chose \(moves[number]) with \(number)")
-        print("App chose \(moves[appChoice]) with \(appChoice)")
-        print("Player wants to win? \(playerToWin)")
+    func calculateWinOrLose(_ number: Int) {
 
-
-        print(moves)
-
-
-        let playerChoice = moves[number]
-        let appChoice = moves[appChoice]
-
-        if appChoice == playerChoice {
-            // neither win nor lose
-            return
+        if number == correctChoice {
+            score += 1
+            scoreTitle = "Correct"
+        } else {
+            score -= 1
+            scoreTitle = "Bad Luck"
         }
 
 
-
-
-
-
-
-        if appChoice == "✂️" && playerChoice == "🪨" {
-
-            if playerToWin == true {
-                // player wins
-                score += 1
-                scoreTitle = "You Win"
-            } else {
-                score -= 1
-                scoreTitle = "You Lose"
-
-            }
-        }
-        if appChoice == "✂️" && playerChoice == "📄" {
-            // app wins
-            if playerToWin == false {
-                // player wins
-                score += 1
-                scoreTitle = "You Win"
-
-            } else {
-                score -= 1
-                scoreTitle = "You Lose"
-
-            }
-        }
-
-        if appChoice == "🪨" && playerChoice == "✂️"  {
-            // app wins
-
-            if playerToWin == false {
-                // player wins
-                score += 1
-                scoreTitle = "You Win"
-
-            } else {
-                scoreTitle = "You lose"
-                score -= 1
-            }
-        }
-        if appChoice == "🪨" && playerChoice == "📄"  {
-            // player wins
-            if playerToWin == true {
-                // player wins
-                score += 1
-                scoreTitle = "You Win"
-
-            } else {
-                score -= 1
-                scoreTitle = "You lose"
-
-            }
-        }
-
-        if appChoice == "📄" && playerChoice == "✂️" {
-            // player wins
-            if playerToWin == true {
-                // player wins
-                score += 1
-                scoreTitle = "You Win"
-
-            } else {
-                scoreTitle = "You Lose"
-                score -= 1
-            }
-        }
-        if appChoice == "📄" && playerChoice == "🪨" {
-            // app wins
-            if playerToWin == false {
-                // player wins
-                score += 1
-                scoreTitle = "You Win"
-
-            } else {
-                score -= 1
-                scoreTitle = "You Lose"
-
-            }
-        }
-
-        if score > 2 {
+        if score > 9 {
             gameEnded = true
         } else {
             showingScore = true
 
         }
-
-
-
     }
 
     func next() {
-
         appChoice = Int.random(in: 0...2)
         shouldWin.toggle()
     }
@@ -243,7 +153,6 @@ struct ContentView: View {
         next()
     }
 }
-
 
 
 struct ContentView_Previews: PreviewProvider {
